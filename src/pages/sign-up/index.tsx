@@ -10,7 +10,7 @@ import ProfileForm from '../../components/profile-form';
 import PasswordForm from '../../components/password-form';
 import RightBottomButton from '../../components/common/right-button';
 import { ClientApi } from '../../http-client';
-import { IClient, IClientFormData } from '../../types';
+import { IClientFormData, ICreateClientData } from '../../types';
 import { Routes } from '../../constants';
 
 const SignUpPage: FC = () => {
@@ -20,7 +20,7 @@ const SignUpPage: FC = () => {
   const history = useHistory();
 
   const onSubmit = async (data: IClientFormData) => {
-    const client: IClient = {
+    const client: ICreateClientData = {
       address: {
         country: data.country,
         city: data.city,
@@ -38,14 +38,12 @@ const SignUpPage: FC = () => {
     };
 
     await clientApi.createClient(client);
-    history.push(Routes.Home);
+    history.push(Routes.Login);
   };
-
-  const onError = (error: any, e: any) => console.log(error, e);
 
   return (
     <Card className={classes.root}>
-      <form onSubmit={handleSubmit(onSubmit, onError)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={4}>
           <Grid item md={6} xs={12}>
             <AddressForm control={control} errors={errors} />

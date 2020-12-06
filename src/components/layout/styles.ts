@@ -92,12 +92,16 @@ export const getLayoutStyles = makeStyles((theme: Theme) => ({
     '& main': {
       backgroundColor: theme.palette.primary.contrastText,
       overflowX: 'auto',
+
+      '&>div': {
+        paddingTop: '3rem',
+      },
     },
     [theme.breakpoints.up('sm')]: {
-      gridTemplateRows: 'auto 1fr 12.75rem',
+      gridTemplateRows: 'auto 1fr',
     },
     [theme.breakpoints.up('md')]: {
-      gridTemplateRows: 'auto 1fr 7.5rem',
+      gridTemplateRows: 'auto 1fr',
     },
   },
 }));

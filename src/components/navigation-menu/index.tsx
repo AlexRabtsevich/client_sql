@@ -7,10 +7,15 @@ import { useRouteMatch, useHistory } from 'react-router-dom';
 import { getNavigationLinksStyles } from './styles';
 import { INavigationMenuLink } from '../../types';
 import { useNavigationLinksOptions } from './use-navigation-links';
+import { useClientContext } from '../../stores/client-store';
 
 const NavigationMenu: FC = () => {
   const match = useRouteMatch();
   const history = useHistory();
+  const theme = useTheme();
+  const isDesktopView = useMediaQuery(theme.breakpoints.up('sm'));
+  const styles = getNavigationLinksStyles(isDesktopView);
+  const { state } = useClientContext();
 
   const currentRoute = useMemo(() => match?.path.split('/').reduce((_, last) => `/${last}`), [
     match.path,
@@ -24,11 +29,7 @@ const NavigationMenu: FC = () => {
     [history]
   );
 
-  const theme = useTheme();
-  const isDesktopView = useMediaQuery(theme.breakpoints.up('sm'));
-  const styles = getNavigationLinksStyles(isDesktopView);
-
-  const navigationLinks: INavigationMenuLink[] = useNavigationLinksOptions();
+  const navigationLinks: INavigationMenuLink[] = useNavigationLinksOptions(state.isAuthorized);
 
   return (
     <BottomNavigation value={currentRoute} onChange={onChange} showLabels className={styles.root}>

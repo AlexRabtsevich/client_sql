@@ -1,0 +1,2 @@
+export const UPDATE_CLIENT = 'UPDATE_CLIENT';
+export const LOG_OUT_CLIENT = 'LOG_OUT_CLIENT';
