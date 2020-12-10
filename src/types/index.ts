@@ -8,3 +8,4 @@ export * from './employee';
 export * from './common';
 export * from './customer';
 export * from './room';
+export * from './booking';

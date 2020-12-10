@@ -20,7 +20,7 @@ const Modal: FC<IProps> = ({ children, onClose, actionBar, isOpen }) => {
   return (
     <MaterialDialog className={classes.root} fullWidth open={isOpen} onBackdropClick={onClose}>
       <CloseIcon className={classes.headerCloseIcon} onClick={onClose} />
-      <DialogContent>{children}</DialogContent>
+      <DialogContent style={{ padding: '2rem' }}>{children}</DialogContent>
       {withActionBar && <DialogActions className={classes.actionBar}>{actionBar}</DialogActions>}
     </MaterialDialog>
   );

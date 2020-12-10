@@ -1,5 +1,5 @@
 import { BasicApi } from './basic-api';
-import {ICustomer} from '../types';
+import { ICustomer } from '../types';
 import { getData } from '../utils/get-data';
 
 export class CustomerApi extends BasicApi {
@@ -25,5 +25,11 @@ export class CustomerApi extends BasicApi {
   public deleteCustomer(id: string): any {
     const deletePath = `${this.customersPath}/${id}`;
     this.https.delete(deletePath);
+  }
+
+  public updateCustomer(customer: Partial<ICustomer>): Promise<void> {
+    const response = this.https.put(this.customersPath, customer);
+
+    return getData(response);
   }
 }

@@ -12,6 +12,7 @@ const reducer = produce((draft: Draft<IClientStore>, action: WritableDraft<Actio
   switch (action.type) {
     case actionTypes.UPDATE_CLIENT: {
       draft.isAuthorized = true;
+      draft.id = action.payload.id;
       draft.address = action.payload.address;
       draft.profile = action.payload.profile;
       draft.login = action.payload.login;
@@ -22,6 +23,7 @@ const reducer = produce((draft: Draft<IClientStore>, action: WritableDraft<Actio
       draft.address = initialState.address;
       draft.profile = initialState.profile;
       draft.login = initialState.login;
+      draft.id = initialState.id;
       break;
     }
     default: {

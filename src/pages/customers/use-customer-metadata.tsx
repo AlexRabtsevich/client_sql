@@ -1,12 +1,14 @@
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import { ITableMetadata } from '../../types/table';
 import { ICustomerMetadata, IMenuOptions } from '../../types';
 import Menu from '../../components/menu';
 
 type DeleteCustomer = (id: string) => any;
+type UpdateCustomer = (id: string) => any;
 
 const useCustomerMetadata = (
-  deleteCustomer: DeleteCustomer
+  deleteCustomer: DeleteCustomer,
+  updateCustomer: UpdateCustomer
 ): ITableMetadata<ICustomerMetadata>[] => {
   const getFullName = (firstName: string, lastName: string): string => `${firstName} ${lastName}`;
 
@@ -19,11 +21,15 @@ const useCustomerMetadata = (
           action: () => deleteCustomer(id),
           label: 'Delete',
         },
+        {
+          action: () => updateCustomer(id),
+          label: 'Update',
+        },
       ];
 
       return <Menu options={menuOptions} />;
     },
-    [deleteCustomer]
+    [deleteCustomer, updateCustomer]
   );
 
   return useMemo(

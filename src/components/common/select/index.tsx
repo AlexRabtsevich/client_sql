@@ -12,7 +12,7 @@ interface IProps {
   selectedOption: string;
   label: string;
   onSelectOption: (option: string) => void;
-  error: any;
+  error?: any;
   helperText?: string;
 }
 

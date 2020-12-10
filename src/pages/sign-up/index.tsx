@@ -2,8 +2,8 @@ import React, { FC } from 'react';
 import Card from '@material-ui/core/Card';
 import { useForm } from 'react-hook-form';
 import { Grid } from '@material-ui/core';
-
 import { useHistory } from 'react-router-dom';
+
 import AddressForm from '../../components/address-form';
 import { getSignUpStyles } from './styles';
 import ProfileForm from '../../components/profile-form';

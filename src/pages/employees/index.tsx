@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Grid, Typography } from '@material-ui/core';
 
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Table } from '../../components/table';
 import useEmployeesMetadata from './use-employees-metadata';
 import { EmployeeApi } from '../../http-client/employee-api';
@@ -13,18 +13,20 @@ import {
   ISelectOption,
 } from '../../types';
 import RightBottomButton from '../../components/common/right-button';
-import Modal from '../../components/modal';
 import { PositionApi } from '../../http-client/position-api';
-import ProfileForm from '../../components/profile-form';
-import AddressForm from '../../components/address-form';
-import Select from '../../components/common/select';
 import { IPosition } from '../../types/position';
+import { getEmployeeStyles } from './styles';
+import EmployeeModal from './employee-modal';
+import { getEmployeeFromData } from './utils';
 
 const EmployeesPage: FC = () => {
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [isOpenModal, setOpenModal] = useState<boolean>(false);
   const [positions, setPositions] = useState<IPosition[]>([]);
   const [selectedPosition, selectPosition] = useState<string>('');
+  const [selectedEmployee, setSelectedEmployee] = useState<IEmployee | null>(null);
+
+  const classes = getEmployeeStyles();
 
   const { errors, control, handleSubmit, setValue } = useForm();
 
@@ -36,7 +38,10 @@ const EmployeesPage: FC = () => {
     [setValue]
   );
 
-  const closeModal = () => setOpenModal(false);
+  const closeModal = () => {
+    setOpenModal(false);
+    setSelectedEmployee(null);
+  };
   const openModal = () => setOpenModal(true);
 
   const employeeApi = useMemo(() => new EmployeeApi(), []);
@@ -61,15 +66,17 @@ const EmployeesPage: FC = () => {
     getPositions();
   }, [getPositions]);
 
+  const preparedEmployee = (employee: IEmployee): IEmployeeMetadata => {
+    return {
+      ...employee.profile,
+      ...employee.address,
+      id: employee.id,
+      position: employee.position.name,
+    };
+  };
+
   const preparedEmployees = (): IEmployeeMetadata[] => {
-    return employees.map((employee) => {
-      return {
-        ...employee.profile,
-        ...employee.address,
-        position: employee.position?.name,
-        id: employee.id,
-      };
-    });
+    return employees.map((employee) => preparedEmployee(employee));
   };
 
   const options: ISelectOption[] = positions.map((position) => ({
@@ -77,34 +84,34 @@ const EmployeesPage: FC = () => {
     label: position.name,
   }));
 
-  const onSubmit = async (data: ICreateEmployeesData) => {
-    const employee: IEmployeeRequest = {
-      address: {
-        country: data.country,
-        city: data.city,
-        street: data.street,
-        house: data.house,
-      },
-      profile: {
-        lastName: data.lastName,
-        firstName: data.firstName,
-        age: data.age,
-        phone: data.phone,
-      },
-      positionId: data.position,
-    };
+  const updateEmployee = (id: string) => {
+    const employee = employees.find((e) => e.id === id);
+    setSelectedEmployee(employee || null);
+    openModal();
+  };
 
+  const onCreateEmployeeSubmit = async (data: ICreateEmployeesData) => {
+    const employee: IEmployeeRequest = getEmployeeFromData(data);
     await employeeApi.createEmployee(employee);
     closeModal();
-    getEmployees();
+    await getEmployees();
   };
+
+  const onUpdateEmployeeSubmit = async (data: ICreateEmployeesData) => {
+    const employee: IEmployeeRequest = getEmployeeFromData(data);
+    await employeeApi.updateEmployee(employee);
+    closeModal();
+    await getEmployees();
+  };
+
+  const onSubmit = selectedEmployee ? onUpdateEmployeeSubmit : onCreateEmployeeSubmit;
 
   const deleteEmployee = async (id: string) => {
     await employeeApi.deleteEmployees(id);
     await getEmployees();
   };
 
-  const metadata = useEmployeesMetadata(deleteEmployee);
+  const metadata = useEmployeesMetadata(deleteEmployee, updateEmployee);
 
   return (
     <Grid container spacing={3}>
@@ -117,45 +124,18 @@ const EmployeesPage: FC = () => {
       <Grid item md={12} xs={12}>
         <Table metadata={metadata} data={preparedEmployees()} />
       </Grid>
-      <Modal isOpen={isOpenModal} onClose={closeModal}>
-        <Typography variant='h4' align='center'>
-          Add Employee
-        </Typography>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2}>
-            <Grid md={3} />
-            <Grid item md={7} xs={12}>
-              <ProfileForm errors={errors} control={control} />
-            </Grid>
-            <Grid md={3} />
-            <Grid item md={7} xs={12}>
-              <AddressForm errors={errors} control={control} />
-            </Grid>
-            <Grid md={3} />
-            <Grid item md={7} xs={12}>
-              <AddressForm errors={errors} control={control} />
-            </Grid>
-            <Grid md={3} />
-            <Grid item md={7} xs={12}>
-              <Controller
-                as={Select}
-                name='position'
-                control={control}
-                rules={{ required: true }}
-                label='Position'
-                selectedOption={selectedPosition}
-                defaultValue={selectedPosition || ''}
-                onSelectOption={onSelectPosition}
-                options={options}
-                error={!!errors.position}
-              />
-            </Grid>
-            <Grid container item md={10} xs={12} justify='flex-end'>
-              <RightBottomButton type='submit'>Create</RightBottomButton>
-            </Grid>
-          </Grid>
-        </form>
-      </Modal>
+      <EmployeeModal
+        isOpenModal={isOpenModal}
+        closeModal={closeModal}
+        errors={errors}
+        control={control}
+        onSubmit={handleSubmit(onSubmit)}
+        selectedPosition={selectedEmployee?.position.id || selectedPosition}
+        options={options}
+        onSelectPosition={onSelectPosition}
+        address={selectedEmployee?.address}
+        profile={selectedEmployee?.profile}
+      />
     </Grid>
   );
 };

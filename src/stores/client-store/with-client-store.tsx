@@ -11,6 +11,7 @@ export const initialState: IClientStore = {
   address: null,
   profile: null,
   login: null,
+  id: null,
 };
 
 export const ClientContext = createContext<IClientContext>({

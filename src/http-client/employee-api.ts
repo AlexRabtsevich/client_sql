@@ -1,5 +1,5 @@
 import { BasicApi } from './basic-api';
-import { IEmployee, IEmployeeRequest } from '../types';
+import { ICustomer, IEmployee, IEmployeeRequest } from '../types';
 import { getData } from '../utils/get-data';
 
 export class EmployeeApi extends BasicApi {
@@ -25,5 +25,11 @@ export class EmployeeApi extends BasicApi {
   public deleteEmployees(id: string): any {
     const deletePath = `${this.employeePath}/${id}`;
     this.https.delete(deletePath);
+  }
+
+  public updateEmployee(employee: Partial<IEmployee>): Promise<void> {
+    const response = this.https.put(this.employeePath, employee);
+
+    return getData(response);
   }
 }

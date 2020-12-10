@@ -3,13 +3,15 @@ import { Grid, Typography } from '@material-ui/core';
 import { Control } from 'react-hook-form/dist/types/form';
 import { Controller } from 'react-hook-form';
 import TextField from '@material-ui/core/TextField';
+import { IAddress } from '../../types';
 
 interface IProps {
   errors: any;
   control: Control;
+  address?: IAddress;
 }
 
-const AddressForm: FC<IProps> = ({ control, errors }) => {
+const AddressForm: FC<IProps> = ({ control, errors, address }) => {
   return (
     <Grid container spacing={3}>
       <Grid item container>
@@ -22,6 +24,7 @@ const AddressForm: FC<IProps> = ({ control, errors }) => {
           fullWidth
           id='standard-country'
           label='Country'
+          defaultValue={address?.country}
           control={control}
           helperText={errors?.country?.type}
           error={!!errors.country}
@@ -36,6 +39,7 @@ const AddressForm: FC<IProps> = ({ control, errors }) => {
           id='standard-city'
           label='City'
           control={control}
+          defaultValue={address?.city}
           helperText={errors?.city?.type}
           error={!!errors.city}
           rules={{ required: true }}
@@ -49,6 +53,7 @@ const AddressForm: FC<IProps> = ({ control, errors }) => {
           id='standard-street'
           label='Street'
           control={control}
+          defaultValue={address?.street}
           helperText={errors?.street?.type}
           error={!!errors.street}
           rules={{ required: true }}
@@ -62,6 +67,7 @@ const AddressForm: FC<IProps> = ({ control, errors }) => {
           id='standard-house'
           label='house'
           control={control}
+          defaultValue={address?.house}
           helperText={errors?.house?.type}
           error={!!errors.house}
           rules={{ required: true }}

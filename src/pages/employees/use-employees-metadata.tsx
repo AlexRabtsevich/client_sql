@@ -4,9 +4,11 @@ import { IEmployeeMetadata, IMenuOptions } from '../../types';
 import Menu from '../../components/menu';
 
 type DeleteEmployee = (id: string) => any;
+type UpdateEmployee = (id: string) => any;
 
 const useEmployeesMetadata = (
-  deleteEmployee: DeleteEmployee
+  deleteEmployee: DeleteEmployee,
+  updateEmployee: UpdateEmployee
 ): ITableMetadata<IEmployeeMetadata>[] => {
   const getFullName = (firstName: string, lastName: string): string => `${firstName} ${lastName}`;
 
@@ -18,6 +20,10 @@ const useEmployeesMetadata = (
         {
           action: () => deleteEmployee(id),
           label: 'Delete',
+        },
+        {
+          action: () => updateEmployee(id),
+          label: 'Update',
         },
       ];
 

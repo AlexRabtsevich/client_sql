@@ -3,13 +3,17 @@ import { IAddress } from './address';
 import { ILogin } from './login';
 
 export interface IClient {
+  id: string;
   profile: IProfile;
   address: IAddress;
   login: string;
 }
 
-export interface ICreateClientData extends IClient {
+export interface ICreateClientData {
   password: string;
+  profile: IProfile;
+  address: IAddress;
+  login: string;
 }
 
 export interface IClientStore {

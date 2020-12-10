@@ -13,6 +13,7 @@ export interface ILogOutClient {
 }
 
 export interface IClientStore {
+  id: string | null;
   profile: IProfile | null;
   address: IAddress | null;
   login: string | null;

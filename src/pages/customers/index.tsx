@@ -1,23 +1,26 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Grid, Typography } from '@material-ui/core';
-
 import { useForm } from 'react-hook-form';
+
 import { ICreateCustomerData, ICustomer, ICustomerMetadata } from '../../types';
 import RightBottomButton from '../../components/common/right-button';
-import Modal from '../../components/modal';
-import ProfileForm from '../../components/profile-form';
-import AddressForm from '../../components/address-form';
 import { CustomerApi } from '../../http-client/customer-api';
 import useCustomerMetadata from './use-customer-metadata';
 import { Table } from '../../components/table';
+import CustomerModal from './customer-modal';
+import { getCustomerFromData } from './utils';
 
 const CustomersPage: FC = () => {
   const [customers, setCustomers] = useState<ICustomer[]>([]);
   const [isOpenModal, setOpenModal] = useState<boolean>(false);
+  const [selectedCustomer, setSelectedProfile] = useState<ICustomer | null>(null);
 
   const { errors, control, handleSubmit } = useForm();
 
-  const closeModal = () => setOpenModal(false);
+  const closeModal = () => {
+    setOpenModal(false);
+    setSelectedProfile(null);
+  };
   const openModal = () => setOpenModal(true);
 
   const customerApi = useMemo(() => new CustomerApi(), []);
@@ -32,32 +35,20 @@ const CustomersPage: FC = () => {
     getCustomers();
   }, [getCustomers]);
 
-  const preparedCustomers = (): ICustomerMetadata[] => {
-    return customers.map((customer) => {
-      return {
-        ...customer.profile,
-        ...customer.address,
-        id: customer.id,
-      };
-    });
+  const preparedCustomer = (customer: ICustomer): ICustomerMetadata => {
+    return {
+      ...customer.profile,
+      ...customer.address,
+      id: customer.id,
+    };
   };
 
-  const onSubmit = async (data: ICreateCustomerData) => {
-    const customer: Partial<ICustomer> = {
-      address: {
-        country: data.country,
-        city: data.city,
-        street: data.street,
-        house: data.house,
-      },
-      profile: {
-        lastName: data.lastName,
-        firstName: data.firstName,
-        age: data.age,
-        phone: data.phone,
-      },
-    };
+  const preparedCustomers = (): ICustomerMetadata[] => {
+    return customers.map((customer) => preparedCustomer(customer));
+  };
 
+  const onCreateSubmit = async (data: ICreateCustomerData) => {
+    const customer: Partial<ICustomer> = getCustomerFromData(data);
     await customerApi.createCustomer(customer);
     closeModal();
     getCustomers();
@@ -68,7 +59,23 @@ const CustomersPage: FC = () => {
     await getCustomers();
   };
 
-  const metadata = useCustomerMetadata(deleteCustomer);
+  const updateCustomer = (id: string) => {
+    const customer = customers.find((c) => c.id === id);
+    setSelectedProfile(customer || null);
+    openModal();
+  };
+
+  const onUpdateSubmit = async (data: ICreateCustomerData) => {
+    const customer: Partial<ICustomer> = getCustomerFromData(data);
+    customer.id = selectedCustomer?.id;
+    await customerApi.updateCustomer(customer);
+    closeModal();
+    await getCustomers();
+  };
+
+  const onSubmit = selectedCustomer ? onUpdateSubmit : onCreateSubmit;
+
+  const metadata = useCustomerMetadata(deleteCustomer, updateCustomer);
 
   return (
     <Grid container spacing={3}>
@@ -81,30 +88,15 @@ const CustomersPage: FC = () => {
       <Grid item md={12} xs={12}>
         <Table metadata={metadata} data={preparedCustomers()} />
       </Grid>
-      <Modal isOpen={isOpenModal} onClose={closeModal}>
-        <Typography variant='h4' align='center'>
-          Add Customer
-        </Typography>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2}>
-            <Grid md={3} />
-            <Grid item md={7} xs={12}>
-              <ProfileForm errors={errors} control={control} />
-            </Grid>
-            <Grid md={3} />
-            <Grid item md={7} xs={12}>
-              <AddressForm errors={errors} control={control} />
-            </Grid>
-            <Grid md={3} />
-            <Grid item md={7} xs={12}>
-              <AddressForm errors={errors} control={control} />
-            </Grid>
-            <Grid container item md={10} xs={12} justify='flex-end'>
-              <RightBottomButton type='submit'>Create Customer</RightBottomButton>
-            </Grid>
-          </Grid>
-        </form>
-      </Modal>
+      <CustomerModal
+        isOpenModal={isOpenModal}
+        closeModal={closeModal}
+        errors={errors}
+        control={control}
+        onSubmit={handleSubmit(onSubmit)}
+        profile={selectedCustomer?.profile}
+        address={selectedCustomer?.address}
+      />
     </Grid>
   );
 };

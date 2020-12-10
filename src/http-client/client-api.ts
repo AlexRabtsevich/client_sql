@@ -3,7 +3,7 @@ import { IClient, ICreateClientData } from '../types';
 import { getData } from '../utils/get-data';
 
 export class ClientApi extends BasicApi {
-  private clientPath = 'clients';
+  private clientPath = 'managers';
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor() {
